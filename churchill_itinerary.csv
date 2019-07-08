@@ -1,0 +1,20 @@
+date,location,lat,lon,Event,with_name,with_institution
+05/04/19,Adelaide Airport,-34.946305,138.533238,Flight,Depart for the start of the Churchill,NA
+09/04/19,Turing Institute,51.529992,-0.127652,Meeting,Dr. Melanie Smallman,University College London
+10/04/19,Sommerset House,51.511086,-0.117148,Meeting,Jacob Ohrvik-Stott,doteveryone
+10/04/19,Open Data Institute,51.522352,-0.083408,Meeting,Peter Wells,Open Data Institute
+15/04/19,Newcastle University Medical School,54.981331,-1.621168,Meeting,Prof. Paul Burton,"Institute of Health & Society, Newcastle University"
+16/04/19,"Newcastle University, School of Geography, Politics and Sociology",54.981739,-1.610543,Meeting,"Prof. Madeleine Murtagh, Mavis Machirori, Dr. Joel Minion and Dr Neil Jenkings,","School of Geography, Politics and Sociology, Newcastle University"
+29/04/19,"17 Mill Lane, Cambridge Cambridge Technology & New Media Research Cluster",52.202012,0.117197,Seminar,Dr. Rune Nyrup,Cambridge Technology & New Media Research Cluster
+29/04/19,Cambridge Computer Laboratory,52.210957,0.09175,Seminar,Dr. David Sharp,Ocado Technology 10x
+29/04/19,Leverhulme Centre for the Future of Intelligence,52.202012,0.117197,Meeting,Dr. Martina Kunz,"Leverhulme Centre for the Future of Intelligence, University of Camrbdige"
+30/04/19,St Edmund's College Cambridge,52.212792,0.109544,Seminar,Professor Nigel Crook,Oxford Brookes University
+30/04/19,"Amgen Ltd, Cambridge Science Park",52.235597,0.142892,Seminar,Matthew Bland,"University of Camrbdige, Institute of Criminology"
+01/05/19,"Statistical Laboratory, Cambridge",52.210373,0.10208,Meeting,Sir David John Spiegelhalter,"Statistical Laboratory, University of Cambridge"
+01/05/19,Leverhulme Centre for the Future of Intelligence,52.202012,0.117197,Meeting,Dr Kanta Dihal and Dr Jess Whittlestone,"Leverhulme Centre for the Future of Intelligence, University of Camrbidge"
+02/05/19,Medical Research Council Cognition and Brain Sciences Unit,52.192227,0.119229,Seminar,Dr. Matthew Botvinick,Google Deepmind
+03/05/19,Nesta,51.511624,-0.107404,Meeting (via phone),Vicky Clayton and Louise Reid,Nesta
+07/05/19,Fitzbillies,52.20205,0.118106,Meeting,Dr. Jennifer Cobbe,"Trust & Technology Initiative, University of Cambridge"
+09/05/19,"Darwin College, Cambridge",52.200584,0.113607,Meeting,Dr. Adrian Weller,"Department of Engineering, University of Cambridge"
+09/05/19,"Trinity Colege, Cambridge",52.206881,0.117543,Seminar,Dr. David Stillwell,"Psychometrics Centre, Univeristy of Cambridge"
+17/05/19,Adelaide Airport,-34.946305,138.533238,Flight,Arrive for the end of the Churchill,NA

@@ -1,0 +1,348 @@
+---
+title: "churches_churchill_report"
+always_allow_html: yes
+output:
+  word_document: default
+  toc: true
+---
+```{r message=FALSE, warning=FALSE, echo=FALSE}
+library(tidyverse)
+library(here)
+library(knitr)
+library(readr)
+library(leaflet)
+library(timevis)
+library(leafpop)
+library(ggmap)
+library(geosphere)
+library(TSP)
+library(readxl)
+library(broom)
+library(ggrepel)
+library(scales)
+library(tidygraph)
+library(ggraph)
+library(igraph)
+library(magrittr)
+```
+
+#Title page
+Report by Owen Churches, Churchill Fellow
+
+2018 Churchill Fellowship to create fairness and accountability in the use of government decision making algorithms
+
+Awarded by The Winston Churchill Memorial Trust
+
+
+
+#Indemnity
+THE WINSTON CHURCHILL MEMORIAL TRUST
+
+
+Report by Owen Churches, Churchill Fellow
+
+
+2018 Churchill Fellowship to create fairness and accountability in the use of government decision making algorithms
+
+I understand that the Churchill Trust may publish this Report, either in hard copy or on the internet or both, and consent to such publication.
+
+I indemnify the Churchill Trust against any loss, costs or damages it may suffer arising out of any claim or proceedings made against the Trust in respect of or arising out of the publication of any Report Submitted to the Trust and which the Trust places on a website for access over the internet.
+
+I also warrant that my Final Report is original and does not infringe the copyright of any person, or contain anything which is, or the incorporation of which into the Final Report is, actionable for defamation, a breach of any privacy law or obligation, breach of confidence, contempt of court, passing-off or contravention of any other private right or of any law.
+
+Signed  Date
+
+#Achnowledgements
+Thank you to the Winston Churchill Memorial Trust for this opportunity. For choosing this project and for choosing me as a fellow to carry it out. It has been a great privilege and I take seriously the responsibility that this opportunity brings with it.
+
+Thank you to the South Australian Department of Education for supporting this work by continuing my salary while I was on the fellowship. Thank you to my workplace, the Child Death and Serious Injury Review Committee. In particular, thank you to my manager, Dr. Sharyn Watts for encouraging me to apply and for supporting me at every turn.
+
+Thank you to my mentor Donna Mayhew. Your support of me and knowledge of government has been invaluable and you company supremely enjoyable.
+
+Thank you to all the people I have met along the journey so far. Your inspiration, dedication and knowledge has made this an exciting and worthwhile process.
+
+Most of all, thank you to my family. Spending these six weeks overseas together was wonderful.
+
+#Introduction
+This is the introduction that is stupid
+
+#Contact details
+email: ofchurches@gmail.com
+
+twitter: [@owenchurches](https://twitter.com/owenchurches)
+
+blog: [ofchurches.rbind.io](https://ofchurches.rbind.io/)
+
+#Keywords
+Artificial intelligence, ethics, government, regulation, decision making
+
+#Table of Contents
+
+#Executive summary
+##Author and title
+Dr. Owen Churches 2018 Churchill Fellowship to create fairness and accountability in the use of government decision making algorithms
+
+##Background
+As a public servant tasked with executing routine statistical analyses, I felt a waefawerawerwer
+
+##Intended Audience
+Everyone is impacted by the changed terms of rights and responsibilities that have accompanied the rise of automated decision making systems in government. As such, the audience for this report is necessarily broad. The final destination for the message from this report is the senior decision making level of government. However, for the message to have an impact at this level I have written it hoping it will find a ready audience at the middle levels of the public service, in academia and amongst the technologically and politically interested sectors of society.
+
+##Highlights
+asdfasdfasdfa
+
+##Conclusions and recommendations
+aasdfasdfasdfasdf
+
+#Itinerary
+```{r message=FALSE, warning=FALSE, echo=FALSE}
+churchill_itinerary <- read_csv(here("churchill_itinerary.csv")) %>%
+  rename(Date = date, Purpose = Event, Person = with_name, Organisation = with_institution) %>%
+    filter(Purpose != "Flight")
+```
+Across the six weeks of my Fellowship I had `r nrow(churchill_itinerary)` different events. This was made up of `r churchill_itinerary %>% filter(Purpose == "Meeting") %>% nrow()` meetings and `r churchill_itinerary %>% filter(Purpose == "Seminar") %>% nrow()` seminars.
+
+This itinerary is dispplayed in the table, timeline and on the map below.
+
+##As a table
+```{r message=FALSE, warning=FALSE, echo=FALSE}
+churchill_itinerary %>%
+  select(Date, Purpose, Person, Organisation) %>%
+  kable()
+```
+
+##As a timeline
+An interactive version of this timeline is in the online version of this report at [ofchurches.rbind.io](www.ofchurches.rbind.io).
+```{r echo=FALSE}
+churchill_itinerary %>%
+  select(Date, Purpose, Person, Organisation) %>%
+  rename(start = Date) %>%
+  mutate(content = paste(Person, Organisation, sep = "<br/>")) %>%
+  mutate(start = as.Date(start, "%d/%m/%Y")) %>%
+  timevis()
+
+```
+
+
+##As a map
+An interactive version of this map is in the online version of this report at [ofchurches.rbind.io](www.ofchurches.rbind.io).
+```{r echo=FALSE}
+leaflet() %>%
+      addProviderTiles(providers$Esri.WorldStreetMap,
+                       options = providerTileOptions(noWrap = FALSE)
+      ) %>%
+      addMarkers(lat = churchill_itinerary$lat, 
+                 lng = churchill_itinerary$lon, 
+                 popup = paste(sep = "<br/>", 
+                               paste("Meeting with", 
+                                churchill_itinerary$Person), 
+                                paste("from", 
+                                churchill_itinerary$Organisation), 
+                                paste("at", 
+                               churchill_itinerary$location), 
+                               paste("on",
+                               churchill_itinerary$Date)), 
+                 clusterOptions = markerClusterOptions(),
+                 label = churchill_itinerary$Person)
+```
+
+#Background
+I joined the public service as a statistician in mid 2017. And it seemed that I was in the right place at the right time. "Data" was seemingly the topic of every conversation. There were courses on "data" analysis that public servants could attend^[http://sa.ipaa.org.au/downloads/2019%20Course%20Outlines/Analysing%20Data.pdf] and there were high profile public talks on the use of "data" at the highest levels of government^[http://sa.ipaa.org.au/Events/25102017_Data_Sharing_Event.asp].
+
+To test whether my perceptions had some objective basis, I collected every mention of the word "data" in Federal Hansard for statements by members between 1997 and 2017.
+
+```{r echo=FALSE}
+
+hansard <- read_excel("hansard.xlsx") %>%
+  rename(blob = `STATEMENTS BY MEMBERS;O'Connor Electorate: Welfare Reform - 03 Apr 2019`) %>%
+  mutate(number = row_number())
+
+is_date <- which(hansard$blob == "DATE")
+is_actual <- is_date + 1
+
+hansard %>%
+  filter(number %in% is_actual) %>%
+  rename(date = blob) %>%
+  mutate (year = str_sub(date, -5, -2)) %>%
+  mutate(year = as.numeric(year)) %>%
+  count(year) %>%
+  filter(year < 2018) %>%
+  ggplot(aes(x = year, y = n)) + 
+  geom_line(size = 1) + 
+  labs(x = "Year", y = "Times 'data' is mentioned", title = str_wrap("Count of times 'data' is mentioned in statements by members in Australian Hansard from 1997 to 2017", width = 80), caption = "data from https://www.aph.gov.au/Parliamentary_Business/Hansard/Search")
+```
+
+Indeed it seemed that there had been a dramatic increase in mentions of the word "data" in the Australian Parliament since 2014. Surely, I thought, this was a good time for someone with formal trianing in using data to make decisions to be the public service.
+
+However, around the same time, there were some high profile international instances of governments using data to make decisions and causing serious social and personal harm as a result. One of these was the case of the use of data to set the amount of bond in the criminal justice system in Fort Lauderdale, Florida. This story was covered comprehensively in 2016 by Pro Publica^[https://www.propublica.org/article/machine-bias-risk-assessments-in-criminal-sentencing]. This report showed that the proprietary software used to make this decision was highly unreliable: only 20 percent of the people predicted to commit violent crimes in the future actually went on to do so. It also showed that this problem of predicting future crime when it did not eventuate affected different groups of people to a different degree; it wrongly labeled people of colour as likely to comit a future crime at almost twice the rate as white defendants.
+
+It seemed that for all the enthusiam for using data in Government there were some serious issues to address. It also seemed that there was a surge of interest around this time amongst academics and activists in the ethical, social and psychological issues associated with the use of automated decisions. To gain some understanding of the issues, I started reading the published literature in this field.
+
+![My unsystematically collected buch of books on data ethics arranged by year of publication](https://pbs.twimg.com/media/D2OjcIhUcAE_r8p.jpg){width=200px}
+
+Again, the interest in the ethics of data use was rapidly increasing.
+
+#A note on language
+I deliberately chose the term "decision making algorithms" in the title of my fellowship as an umbrella term to cover the large number of analytic strategies including artificial intellienge (AI) and other statistical processes as well as the prerequisite processes of creating, storing and sharing the data these algorithms need.
+
+#Practicing what I preach
+Key parts of ethical use of data are transparency and replicability. When analyses are run in one program, figures produced in another and the text and formating created in a third, it can be difficult for anyone but the author to verify the connections between these stages. And, repeating the exersie at a later time requires repeating all the same stages.
+
+A solution to these problems is the use of a markdown language. Such languages combine the analysis code, figures and text into a single script which can be rendered to a nicely formatted document. To that end, this report was written in RMarkdown. The script with all the underlying code is available on GitHub [here](https://github.com/ofchurches/).
+
+#Themes
+
+## Lessons from the history of statistics
+### Background
+There is so much that is new in AI. New mathematics, new hopes, new perils. But AI did not come out of nowhere. It was not conjoured fresh from the soils of Silicon Valley at the dawn of this millenium. Neither the mathematics nor the social problems they create are without precedent. We have built new ways of thinking about probability before and we have dealt the consequent challenges to established economics and personal privacy with new laws, new social institutions and a never ending quest for further advancing the frontier of mathematical understanding. 
+
+Interestingly, there is an appropriate aphorism that is sometimes misattributed to Winston Churchill^[https://www.nationalchurchillmuseum.org/blog.html] but was in fact written by George Santayana in The Life of Reason (1905)^[Santayana, G. (2010) *The Life of Reason*, Qontro Classic Books, London].
+
+>“Those who cannot remember the past are condemned to repeat it.”
+>
+
+So, in a bid to remember the past and seek the lessons of history, I took the opportunity of being based in the United Kingdom to visit some sites of great statistical significance.
+
+Not all the locations of statistical significance in the United Kingdom are important because they contributed lasting benefits to society. In fact, there are building and lecture theatres at University College London that are still named after eugenicists. Several prominent statisticians in the early 20th Century adhered to this racist view. UCL has developed a podcast which looks into this history and its legancy. It can be accessed [here](https://www.ucl.ac.uk/culture/projects/bricks-mortals).
+
+### Fisher's innovation
+This *statistical history tour* was also spured by my home town of Adelaide's role in global statistical history. The Univeristy of Adelaide was the final academic affiliation of Sir Ronald Aylmer Fisher who was a particularly influencial 20th Centurary statistician. One aspect of R. A. Fisher's work provides an elegant microcosm of the situation we again find ourselves in when we talk about the impact of AI on society; Fisher developed a new mathematical approach to probability but this allowed for the rise of a serious social problem.
+
+In 1925, Fisher published the hugely influential *Statistical Methods for Research Workers*^[Fisher, R. A. (1925) *Statistical Methods for Research Workers*, Oliver & Boyd, Edinburgh]. In it, he stated that "...the theory of inverse probability is founded upon an error". This was a direct rejection of the approach to probability developed by Thomas Bayes around two hundred years earlier. Fisher's prefered approach to thinking about probability was a neuanced version of frequentism. One of the points raised by frequentists in favour of their approach to probability was that it was more *objective* than the Bayesian approach. This appraoch provided a readily accessible method for alaysing the work of experimental science across every disciplin. The volume of scientific literature using Fisher's approach saw a rapid increase across the twentieth century. But, while some of these discoveries were valuable, there was also a cost. By the early years of the 21st century, it became evident that Fisher's appraoch to probability was readily affected by decisions that experimenters could make before, during and after running the experiment. That is, it was highly subjective. New social structures have since arrisen in science to deal with the consequences of using Fisher's approach to probability^[https://doi.org/10.1177%2F1745691612465253].
+
+Before leaving on the fellowship, I visited the memorial to Fisher at the Adelaide Cathedral with my friends [Prof. Joshia Ross](https://twitter.com/JVRoss_UoA), Dr. [Phil Cassey](https://twitter.com/InvasionEcology) and [Dr. Lewis Mitchell](https://twitter.com/lewis_math).
+
+![Dr. Lewis Mitchell and I at the R. A. Fisher memorial in Adelaide Cathedral](https://pbs.twimg.com/media/D2OjcIhUcAE_r8p.jpg){width=200px}
+
+
+```{r echo=FALSE}
+path <- c("https://pbs.twimg.com/media/D6O-1uUW0AEbB0d.jpg", 
+          "https://pbs.twimg.com/media/D6hzcDnXsAE1Nzx.jpg", 
+          "https://pbs.twimg.com/media/D43VCbKWAAAHj_o.jpg", 
+          "https://pbs.twimg.com/media/D3nEZMnXkAEp-YT.jpg", 
+          "https://pbs.twimg.com/media/D32oTTpWwAISgWU.jpg", 
+          "https://pbs.twimg.com/media/D4A78tQWkAAEusF.jpg")
+label <- c("Bletchley Park", 
+           "Gonville & Caius College", 
+           "Broad Street Pump", 
+           "St Thomas' Hospital", 
+           "Bunhill Fields Burial Ground", 
+           "Drapers Hall")
+details <- c("Edward Simpson and Bill Tutte (statue pictured) worked here as code breakers", 
+             "This was R. A. Fisher's College", 
+             "John Snow Snow pioneered the use of dot density maps to trace the source of cholera in Soho in 1854 to this water pump", 
+             "Florence Nightingale built an evidenced based nursing school here. There is now a museum about her work where you can buy prints of her pioneering data visualisations", 
+             "Thomas Bayes is burried here", 
+             "John Graunt was one of the inventors of life tables and attempted to develop a predictive algorithm for plague in London and he was a trained haberdasher in this guild")
+lat <- c(51.997713, 
+         52.205976, 
+         51.513298,
+         51.500151, 
+         51.523759, 
+         51.515368)
+lng <- c(-0.740643, 
+         0.117977, 
+         -0.136765, 
+         -0.117600, 
+         -0.088755, 
+         -0.086601)
+
+stat_hist <- tibble(path, label, details, lat, lng)
+```
+
+Then, while I was on the Fellowship I traveled to `r nrow(stat_hist)` sights of historical statistical importance.
+
+###Locations visited
+
+**Bletchley Park**
+
+![Edward Simpson and Bill Tutte (statue pictured) worked here as code breakers](https://pbs.twimg.com/media/D6O-1uUW0AEbB0d.jpg){width=200px}
+
+
+**Gonville & Caius College**
+
+![This was R. A. Fisher's College](https://pbs.twimg.com/media/D6hzcDnXsAE1Nzx.jpg){width=200px}
+
+
+**Broad Street Pump**
+
+![John Snow Snow pioneered the use of dot density maps to trace the source of cholera in Soho in 1854 to this water pump](https://pbs.twimg.com/media/D43VCbKWAAAHj_o.jpg){width=200px}
+
+
+**St Thomas' Hospital**
+
+![Florence Nightingale built an evidenced based nursing school here. There is now a museum about her work where you can buy prints of her pioneering data visualisations](https://pbs.twimg.com/media/D3nEZMnXkAEp-YT.jpg){width=200px}
+
+
+**Bunhill Fields Burial Ground**
+
+![Thomas Bayes is burried here](https://pbs.twimg.com/media/D32oTTpWwAISgWU.jpg){width=200px}
+
+
+**Drapers Hall**
+
+![John Graunt was one of the inventors of life tables and attempted to develop a predictive algorithm for plague in London and he was a trained haberdasher in this guild](https://pbs.twimg.com/media/D4A78tQWkAAEusF.jpg){width=200px}
+
+### Map of locations visited
+
+An interactive version of this map of these locations is available in the online version of this report at [ofchurches.rbind.io](www.ofchurches.rbind.io).
+
+```{r echo=FALSE}
+    leaflet() %>%
+      addProviderTiles(providers$Esri.WorldStreetMap,
+                       options = providerTileOptions(noWrap = FALSE)
+      ) %>%
+      addMarkers(lat = stat_hist$lat, lng = stat_hist$lng, 
+                 popup = paste(sep = "<br/>",
+                               paste0("<img src='", stat_hist$path,  "', width = 100/>"),
+                               paste0(stat_hist$details)
+                               ),
+                 clusterOptions = markerClusterOptions(),
+                 label = stat_hist$label
+                 )
+```
+
+# Outcomes so far
+## Instalation at MOD
+### Recommendation engines
+When we look for a film to watch on Netflix, the interface we see presents us not with an open list of all the movies stored on the service but rather with a curated, personal set of recommendations for films. Similar processes guide us to find food to eat, friends to meet and lead us toward our choices whenever we interact with the world through an online platform. These recommendations are produced through a class of machine learning algorithms called recommendation engines. In short, by constraining our choices, recommendation engines give us a shortcut to our own personal pleasures.
+
+But for all the increased purchases and add views these algorithms bring, there are costs to individuals and society that are increasingly being detected and described. In the case of YouTube, both the nature of the alarming content that is routinely recommended and an explanation of the way the recommendation engine works have been detailed by Guillaume Chaslot^[https://medium.com/@guillaumechaslot/how-youtubes-a-i-boosts-alternative-facts-3cc276f47cf7].
+
+Early in 2019, the excellent Museum of Discovery [MOD](https://mod.org.au/) in Adelaide sent out a call for scientists and artists to create an installation for their next exhibition which would be on the topic of "pleasure". It occurred to me that at the retail end of recommendation engines, whether we are using them to navigate the news, find friends or digest dinner, there is a sense in which we are always asking for the algorithm to deliver us the same thing: our greatest pleasures.
+
+Using data from an experiment on word associations I ran with Dr. Simon Dr Deyne at the University of Melbourne and Assoc. Prof. Hannah Keage at the University of South Australia, I built a recomendation engine for pleasure and proposed it to MOD as an instalation for their exhibition.
+
+### The finished product
+MOD accepted my instalation for their exhibition. I built a recomendation for pleasures with Dr. Hannah Keage from CAIN lab and Dr. Simon De Deyne from the University of Melbourne.
+
+![The opening of the HEDONISM exhibition at MOD. The developers of the 'Its My Pleasure' instalation; Assoc. Prof. Hannah Keage, Dr. Simon De Deyne and me with our work in the background](https://pbs.twimg.com/media/D7Vg5GxVsAEWsvP.jpg){width=200px}
+
+The instalation is on display along with the rest of the HEDONISM exhibition until October 2019. You can see it in person at [MOD](https://mod.org.au/visit/getting-here/) in Adelaide. You can also see the finished product online [here](https://mod.org.au/mypleasure/).
+
+```{r echo=FALSE}
+knitr::include_app("https://mod.org.au/mypleasure/")
+```
+
+## public_sectR
+I have started a professional group for members of the public service who are based in Adelaide who use the R lanugage for statistical computing in their work or would like to start using it.
+
+We meet once a month in the boardroom of my agency, the Child Death and Serious Injury Review Committee. The meetings follow a comunity of practice model in which everyone teaches what they already know and learns in turn when there is something they do not yet know. There are currently five members of the group. I am encouraged by the interest of this small group in sharing the latest advances in the R language and in telling stories about how they are using it in their professional work and forsee that the group will continue indefinately.
+
+
+##Artificial Intelligence Collaborative Network
+I was an early member of a professional group of AI practitioners called the AICN^[https://www.collaborativenetwork.ai/home]. Since starting my Churchill Fellowship I have worked with the AICN to develop areas of public engagement in AI ethics.
+
+### AI Ethics Bookclub
+We have started a monthly bookclub in which we read and discuss books on the topic of AI ethics. So far we have 26 members of the club. Some are based here in Adelaide but others are around Australia and around the world. While some members of the bookclub are AI practitioners, the bookclub has also attracted a diverse range of people with a personal or professional interest in AI ethics. This includes lawyers, teachers and public servants.
+
+Our first meeting was in June at [ThincLab](https://www.adelaide.edu.au/thinclab/) and online and we discussed *Made by Humans:The AI Condition* by Ellen Broad.
+
+![The first meeting of the AI Ethics Bookclub hosted by AICN](https://pbs.twimg.com/media/D9QbmdGUwAAO_0A.jpg){width=200px}
+
+The discussion and interest further enhanced my knowedge of AI ethics. Most of all it was encouraging to see how many people were motivated to talk about AI ethics and to learn more from the published literature on the topic.
+
+Considering the rate of publication of books on AI Ethics and the interest shown by members of the bookclub so far, I plan to fascilitate the bookclub indefinately.
+
+### AI Ethics Event for Science Week
+
